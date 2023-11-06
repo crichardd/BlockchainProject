@@ -4,6 +4,16 @@ contract DataStorage {
     address owner;
     mapping(address => mapping(bytes32 => string)) private userData;
 
+    struct PersonalData {
+        string nom;
+        string prenom;
+        string dateNaissance;
+        string email;
+        string telephone;
+        string adresse;
+    }
+    mapping(address => PersonalData) private personalData;
+
     modifier onlyOwner() {
         require(msg.sender == owner, " ");
         _;
@@ -13,11 +23,11 @@ contract DataStorage {
         owner = msg.sender;
     }
 
-    function storeData (bytes32 dataKey, string memory dataValue) public {
+    function storeData(bytes32 dataKey, string memory dataValue) public {
         userData[msg.sender][dataKey] = dataValue;
     }
 
-    function getData(address userAddress, bytes32 dataKey) public view returns (string memory){
+    function getData(address userAddress, bytes32 dataKey) public view returns (string memory) {
         return userData[userAddress][dataKey];
     }
 

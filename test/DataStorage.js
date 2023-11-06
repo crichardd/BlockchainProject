@@ -1,4 +1,4 @@
-const DataStorage = artifacts.require("DataStorage"); // Assurez-vous que le nom du contrat correspond au fichier de votre contrat
+const DataStorage = artifacts.require("DataStorage"); 
 
 contract("DataStorage", (accounts) => {
     let dataStorageInstance;
