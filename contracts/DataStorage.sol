@@ -9,15 +9,15 @@ contract DataStorage {
         _;
     }
 
-    constructor() {
+    constructor() payable {
         owner = msg.sender;
     }
 
-    function storeData(bytes32 dataKey, string memory dataValue) public {
+    function storeData (bytes32 dataKey, string memory dataValue) public {
         userData[msg.sender][dataKey] = dataValue;
     }
 
-    function getData(address userAddress, bytes32 dataKey) public view returns (string memory) {
+    function getData(address userAddress, bytes32 dataKey) public view returns (string memory){
         return userData[userAddress][dataKey];
     }
 
