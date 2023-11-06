@@ -4,6 +4,7 @@
     "hardhat": "^2.18.0"
   },
   "dependencies": {
+    "lotus": "^1.0.1",
     "truffle": "^5.11.5"
   }
 }

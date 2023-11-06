@@ -4,6 +4,8 @@ contract DataStorage {
     address owner;
     mapping(address => mapping(bytes32 => string)) private userData;
 
+
+
     struct PersonalData {
         string lastname;
         string firstname;
@@ -33,7 +35,6 @@ contract DataStorage {
     function getData(address userAddress, bytes32 dataKey) public view returns (string memory){
         return userData[userAddress][dataKey];
     }
-
 
     function grantAccess(address userAddress, bytes32 dataKey, address thirdParty) public onlyOwner {
         require(msg.sender != thirdParty, " ");
