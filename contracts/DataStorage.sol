@@ -5,11 +5,11 @@ contract DataStorage {
     mapping(address => mapping(bytes32 => string)) private userData;
 
     struct PersonalData {
-        string nom;
-        string prenom;
-        string dateNaissance;
-        string email;
-        string telephone;
+        string lastname;
+        string firstname;
+        string birthday;
+        string mail;
+        string phone;
         string adresse;
     }
     mapping(address => PersonalData) private personalData;
@@ -27,13 +27,33 @@ contract DataStorage {
         userData[msg.sender][dataKey] = dataValue;
     }
 
-    function getData(address userAddress, bytes32 dataKey) public view returns (string memory) {
+    function getData(address userAddress, bytes32 dataKey) public view returns (string memory){
         return userData[userAddress][dataKey];
     }
+
 
     function grantAccess(address userAddress, bytes32 dataKey, address thirdParty) public onlyOwner {
         require(msg.sender != thirdParty, " ");
         string memory data = userData[userAddress][dataKey];
         userData[thirdParty][dataKey] = data;
+    }
+
+    function storePersonalData(string memory lastname, string memory firstname, string memory birthday, string memory mail, string memory phone, string memory adresse) public {
+        personalData[msg.sender] = PersonalData(lastname, firstname, birthday, mail, phone, adresse);
+    }
+
+    function getPersonalData(address userAddress) public view returns (string memory lastname, string memory firstname, string memory birthday, string memory mail, string memory phone, string memory adresse) {
+        PersonalData storage data = personalData[userAddress];
+        return (data.lastname, data.firstname, data.birthday, data.mail, data.phone, data.adresse);
+    }
+
+    function grantAccessPersonalData(address userAddress, address thirdParty) public onlyOwner {
+        require(msg.sender != thirdParty, "Permission denied");
+        personalData[thirdParty] = personalData[userAddress];
+    }
+
+    function revokeAccessPersonalData(address adresse, address thirdParty) public onlyOwner {
+        require(msg.sender != thirdParty, "Permission denied");
+        personalData[thirdParty] = PersonalData("", "", "", "", "", "");
     }
 }
