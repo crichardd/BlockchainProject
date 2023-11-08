@@ -11,6 +11,7 @@ contract DataStorage {
         string mail;
         string phone;
         string adresse;
+        string accountkey;
     }
 
     mapping(address => PersonalData) private personalData;
@@ -38,13 +39,13 @@ contract DataStorage {
         userData[thirdParty][dataKey] = data;
     }
 
-    function storePersonalData(string memory lastname, string memory firstname, string memory birthday, string memory mail, string memory phone, string memory adresse) public {
-        personalData[msg.sender] = PersonalData(lastname, firstname, birthday, mail, phone, adresse);
+    function storePersonalData(string memory lastname, string memory firstname, string memory birthday, string memory mail, string memory phone, string memory adresse, string memory accountkey) public {
+        personalData[msg.sender] = PersonalData(lastname, firstname, birthday, mail, phone, adresse, accountkey);
     }
 
-    function getPersonalData(address userAddress) public view returns (string memory lastname, string memory firstname, string memory birthday, string memory mail, string memory phone, string memory adresse) {
+    function getPersonalData(address userAddress) public view returns (string memory lastname, string memory firstname, string memory birthday, string memory mail, string memory phone, string memory adresse, string memory accountkey) {
         PersonalData storage data = personalData[userAddress];
-        return (data.lastname, data.firstname, data.birthday, data.mail, data.phone, data.adresse);
+        return (data.lastname, data.firstname, data.birthday, data.mail, data.phone, data.adresse, data.accountkey);
     }
 
     function grantAccessPersonalData(address userAddress, address thirdParty) public onlyOwner {
@@ -54,6 +55,6 @@ contract DataStorage {
 
     function revokeAccessPersonalData(address adresse, address thirdParty) public onlyOwner {
         require(msg.sender != thirdParty, "Permission denied");
-        personalData[thirdParty] = PersonalData("", "", "", "", "", "");
+        personalData[thirdParty] = PersonalData("", "", "", "", "", "", "");
     }
 }
