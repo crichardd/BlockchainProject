@@ -1,10 +1,25 @@
 {
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "hardhat": "^2.18.0"
+    "hardhat": "^2.19.0"
   },
   "dependencies": {
+    "fhevm": "^0.2.0",
+    "fhevmjs": "^0.2.1",
     "lotus": "^1.0.1",
     "truffle": "^5.11.5"
-  }
+  },
+  "name": "blockchainproject",
+  "description": "",
+  "version": "1.0.0",
+  "main": "hardhat.config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
