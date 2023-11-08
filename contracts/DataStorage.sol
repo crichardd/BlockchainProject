@@ -4,8 +4,6 @@ contract DataStorage {
     address owner;
     mapping(address => mapping(bytes32 => string)) private userData;
 
-
-
     struct PersonalData {
         string lastname;
         string firstname;
