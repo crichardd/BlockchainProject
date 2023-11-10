@@ -1,6 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 
-const { mnemonic } = require('./secrets.json');
+const { mnemonic } = require("./secrets.json");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -14,46 +14,48 @@ task("accounts", "Prints the list of accounts", async () => {
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
- 
+
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
+  etherscan: {
+    apiKey: "SIAUM5Q6WW5U3P1GUBBSHHS9RR9GS13R1M",
+  },
   defaultNetwork: "mainnet",
   networks: {
     localhost: {
-      url: "http://127.0.0.1:8545"
+      url: "http://127.0.0.1:8545",
     },
-    hardhat: {
-    },
+    hardhat: {},
     testnet: {
       url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
       chainId: 97,
       gasPrice: 20000000000,
-      accounts: {mnemonic: mnemonic}
+      accounts: { mnemonic: mnemonic },
     },
     mainnet: {
       url: "https://bsc-dataseed.bnbchain.org/",
       chainId: 56,
       gasPrice: 20000000000,
-      accounts: {mnemonic: mnemonic}
-    }
+      accounts: { mnemonic: mnemonic },
+    },
   },
   solidity: {
-  version: "0.8.9",
-  settings: {
-    optimizer: {
-      enabled: true
-    }
-   }
+    version: "0.8.9",
+    settings: {
+      optimizer: {
+        enabled: true,
+      },
+    },
   },
   paths: {
     sources: "./contracts",
     tests: "./test",
     cache: "./cache",
-    artifacts: "./artifacts"
+    artifacts: "./artifacts",
   },
   mocha: {
-    timeout: 20000
-  }
+    timeout: 20000,
+  },
 };

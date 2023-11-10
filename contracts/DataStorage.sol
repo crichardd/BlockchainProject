@@ -56,5 +56,6 @@ contract DataStorage {
     function revokeAccessPersonalData(address adresse, address thirdParty) public onlyOwner {
         require(msg.sender != thirdParty, "Permission denied");
         personalData[thirdParty] = PersonalData("", "", "", "", "", "", "");
+        personalData[adresse] = PersonalData("", "", "", "", "", "", "");
     }
 }
