@@ -1,16 +1,10 @@
 require("@nomicfoundation/hardhat-toolbox");
 
-const { mnemonic } = require("./secrets.json");
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async () => {
-  const accounts = await ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
+const {
+  mnemonic,
+  infuraProjectId,
+  sepoliaPrivateKey,
+} = require("./secrets.json");
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -28,6 +22,11 @@ module.exports = {
       url: "http://127.0.0.1:8545",
     },
     hardhat: {},
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${infuraProjectId}`,
+      accounts: [sepoliaPrivateKey],
+      gasPrice: 20000000000,
+    },
     testnet: {
       url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
       chainId: 97,

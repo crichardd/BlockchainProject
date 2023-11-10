@@ -6,18 +6,17 @@ npm install
 
 npx hardhat compile
 
-npx hardhat run --network testnet scripts/deploy.js
+# deployer le contract
+npx hardhat run --network sepolia scripts/deploy.js
 
-npx hardhat  verify --network testnet adress_id
-
-# accès verif deploy contract
-https://etherscan.io/
-user: WinnieParton
-password: dbMBU$NJ7^Nb4LVr@ntP
-
-# when you have login
-1- API Keys
-2- Name is : *Web3 Blockchain*
-3- copy token and add *hardhat.config.js*
+# avoir l'adresse du contract
+npx hardhat verify --network sepolia 0xC9bdfe246D23cbd8323B3D2959BC728D903AE741   
 
 
+# Info after deploy
+Adress send Deploying contracts with the account: 0xf7E4Dd8Df7Bfce6de7B9A4DC4e2cDa6a7Df31210
+
+Adress receive Lock with 0.001ETH and unlock timestamp 1699648275 deployed to 0xaBdB66a3a67A7f7426834DCDA1c97f04a4EE9499
+
+# adresse du contract
+https://sepolia.etherscan.io/address/0xC9bdfe246D23cbd8323B3D2959BC728D903AE741#code
