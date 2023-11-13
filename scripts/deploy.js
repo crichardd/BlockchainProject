@@ -16,17 +16,29 @@ async function main() {
 
   const lockedAmount = hre.ethers.parseEther("0.0001");
 
-  const lock = await hre.ethers.deployContract("DataStorage", {
+  const lock = await hre.ethers.getContractFactory("DataStorage", {
     value: lockedAmount,
   });
 
-  await lock.waitForDeployment();
+  const receipt = await lock.deploy();
+  // Get the contract address from the transaction receipt
+  await receipt.waitForDeployment();
+
+  const contractAddress = await receipt.getAddress();
 
   console.log(
     `Lock with ${ethers.formatEther(
       lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
+    )}ETH and unlock timestamp ${unlockTime} deployed to ${contractAddress}`
   );
+
+  let res = await receipt.deploymentTransaction()?.wait(20);
+
+  console.log(res);
+  await hre.run("verify:verify", {
+    address: contractAddress,
+    constructorArguments: [],
+  });
 }
 
 main().catch((error) => {
