@@ -1,61 +1,103 @@
 pragma solidity ^0.8.0;
 
 contract DataStorage {
-    address owner;
-    mapping(address => mapping(bytes32 => string)) private userData;
-
-    struct PersonalData {
-        string lastname;
-        string firstname;
-        string birthday;
-        string mail;
-        string phone;
-        string adresse;
-        string accountkey;
+    struct DonneesUtilisateur {
+        string nom;
+        string prenom;
+        string dateNaissance;
+        string email;
+        string telephone;
+        mapping(address => bool) autorisations;
     }
 
-    mapping(address => PersonalData) private personalData;
+    mapping(address => DonneesUtilisateur) utilisateurs;
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, " ");
-        _;
+    event NouvelUtilisateurEnregistre(address utilisateur);
+    event AutorisationAccordee(address utilisateur, address autorisePar);
+    event AutorisationRevoquee(address utilisateur, address revoquePar);
+
+    function enregistrerUtilisateur(
+        address _utilisateur,
+        string memory _nom,
+        string memory _prenom,
+        string memory _dateNaissance,
+        string memory _email,
+        string memory _telephone
+    ) public {
+        utilisateurs[_utilisateur].nom = _nom;
+        utilisateurs[_utilisateur].prenom = _prenom;
+        utilisateurs[_utilisateur].dateNaissance = _dateNaissance;
+        utilisateurs[_utilisateur].email = _email;
+        utilisateurs[_utilisateur].telephone = _telephone;
+
+        emit NouvelUtilisateurEnregistre(_utilisateur);
     }
 
-    constructor() payable {
-        owner = msg.sender;
+    function accorderAutorisation(
+        address _utilisateur,
+        address _autorisePar
+    ) public {
+        utilisateurs[_utilisateur].autorisations[_autorisePar] = true;
+        emit AutorisationAccordee(_utilisateur, _autorisePar);
     }
 
-    function storeData(bytes32 dataKey, string memory dataValue) public {
-        userData[msg.sender][dataKey] = dataValue;
+    function revoquerAutorisation(
+        address _utilisateur,
+        address _revoquePar
+    ) public {
+        utilisateurs[_utilisateur].autorisations[_revoquePar] = false;
+        emit AutorisationRevoquee(_utilisateur, _revoquePar);
     }
 
-    function getData(address userAddress, bytes32 dataKey) public view returns (string memory){
-        return userData[userAddress][dataKey];
+    function recupererDonneesAutorisees(
+        address _utilisateur,
+        address _demandeur
+    )
+        public
+        view
+        returns (
+            string memory nom,
+            string memory prenom,
+            string memory dateNaissance,
+            string memory email,
+            string memory telephone
+        )
+    {
+        require(
+            utilisateurs[_utilisateur].autorisations[_demandeur],
+            "Acces non autorise"
+        );
+
+        return (
+            utilisateurs[_utilisateur].nom,
+            utilisateurs[_utilisateur].prenom,
+            utilisateurs[_utilisateur].dateNaissance,
+            utilisateurs[_utilisateur].email,
+            utilisateurs[_utilisateur].telephone
+        );
     }
 
-    function grantAccess(address userAddress, bytes32 dataKey, address thirdParty) public onlyOwner {
-        require(msg.sender != thirdParty, " ");
-        string memory data = userData[userAddress][dataKey];
-        userData[thirdParty][dataKey] = data;
-    }
+    function recupererOwnerDonneeUtilisateur(
+        address _utilisateur
+    )
+        public
+        view
+        returns (
+            string memory nom,
+            string memory prenom,
+            string memory dateNaissance,
+            string memory email,
+            string memory telephone
+        )
+    {
+        require(msg.sender == _utilisateur, "Acces non autorise");
 
-    function storePersonalData(string memory lastname, string memory firstname, string memory birthday, string memory mail, string memory phone, string memory adresse, string memory accountkey) public {
-        personalData[msg.sender] = PersonalData(lastname, firstname, birthday, mail, phone, adresse, accountkey);
-    }
-
-    function getPersonalData(address userAddress) public view returns (string memory lastname, string memory firstname, string memory birthday, string memory mail, string memory phone, string memory adresse, string memory accountkey) {
-        PersonalData storage data = personalData[userAddress];
-        return (data.lastname, data.firstname, data.birthday, data.mail, data.phone, data.adresse, data.accountkey);
-    }
-
-    function grantAccessPersonalData(address userAddress, address thirdParty) public onlyOwner {
-        require(msg.sender != thirdParty, "Permission denied");
-        personalData[thirdParty] = personalData[userAddress];
-    }
-
-    function revokeAccessPersonalData(address adresse, address thirdParty) public onlyOwner {
-        require(msg.sender != thirdParty, "Permission denied");
-        personalData[thirdParty] = PersonalData("", "", "", "", "", "", "");
-        personalData[adresse] = PersonalData("", "", "", "", "", "", "");
+        return (
+            utilisateurs[_utilisateur].nom,
+            utilisateurs[_utilisateur].prenom,
+            utilisateurs[_utilisateur].dateNaissance,
+            utilisateurs[_utilisateur].email,
+            utilisateurs[_utilisateur].telephone
+        );
     }
 }
