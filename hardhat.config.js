@@ -37,12 +37,14 @@ module.exports = {
   sourcify: {
     enabled: true,
   },
-  defaultNetwork: "mainnet",
+  defaultNetwork: "hardhat",
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
     },
-    hardhat: {},
+    hardhat: {
+      initialBaseFeePerGas: 0,
+    },
     sepolia: {
       url: `https://sepolia.infura.io/v3/${infuraProjectId}`,
       accounts: [sepoliaPrivateKey],
@@ -51,12 +53,6 @@ module.exports = {
     testnet: {
       url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
       chainId: 97,
-      gasPrice: 20000000000,
-      accounts: { mnemonic: mnemonic },
-    },
-    mainnet: {
-      url: "https://bsc-dataseed.bnbchain.org/",
-      chainId: 56,
       gasPrice: 20000000000,
       accounts: { mnemonic: mnemonic },
     },
