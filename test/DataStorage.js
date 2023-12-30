@@ -1,79 +1,137 @@
-const DataStorage = artifacts.require("DataStorage"); 
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
-contract("DataStorage", (accounts) => {
-    let dataStorageInstance;
+describe("DataStorage Contract", function () {
+  let dataStorage;
+  let user1;
+  let user2;
 
-    beforeEach(async () => {
-        dataStorageInstance = await DataStorage.new({ from: accounts[0] });
-    });
+  this.beforeEach(async () => {
+    [user1, user2] = await ethers.getSigners();
 
-    it("devrait stocker et récupérer des données", async () => {
-        const dataKey = web3.utils.fromAscii("name");
-        const dataValue = "John Doe";
+    // Deploy the contract and assign the deployed instance to dataStorage
+    const DataStorage = await ethers.getContractFactory("DataStorage");
+    dataStorage = await DataStorage.deploy();
+    await dataStorage.waitForDeployment();
 
-        await dataStorageInstance.storeData(dataKey, dataValue, { from: accounts[0] });
-        const storedValue = await dataStorageInstance.getData(accounts[0], dataKey);
+    console.log("Deploying contracts with the user2:", user2.address);
+    console.log("Deploying contracts with the user1:", user1.address);
 
-        assert.equal(storedValue, dataValue, "La valeur stockée devrait être égale à la valeur d'origine.");
-    });
+    await dataStorage.enregistrerUtilisateur(
+      user1.address,
+      "User3",
+      "Doe3 ",
+      "01/01/1998",
+      "ali@example.com",
+      "654 Main St",
+      "1234567897"
+    );
+  });
 
-    it("devrait accorder l'accès et récupérer des données accordées", async () => {
-        const dataKey = web3.utils.fromAscii("name");
-        const dataValue = "John Doe";
-        const thirdParty = accounts[1];
+  it("Enregistre un nouvel utilisateur", async function () {
+    const nom = "John";
+    const prenom = "Doe";
+    const dateNaissance = "01/01/1990";
+    const email = "john@example.com";
+    const adresse = "123 Main St";
+    const telephone = "1234567890";
 
-        await dataStorageInstance.storeData(dataKey, dataValue, { from: accounts[0] });
-        await dataStorageInstance.grantAccess(accounts[0], dataKey, thirdParty, { from: accounts[0] });
+    // Call the enregistrerUtilisateur function with new user data
+    await dataStorage.enregistrerUtilisateur(
+      user1.address,
+      nom,
+      prenom,
+      dateNaissance,
+      email,
+      adresse,
+      telephone
+    );
 
-        const grantedValue = await dataStorageInstance.getData(thirdParty, dataKey);
+    // // Fetch the user data after the transaction is mined
+    const userData = await dataStorage.recupererOwnerDonneeUtilisateur(
+      user1.address
+    );
+    // Verify that the user's data was correctly registered
+    expect(userData.nom).to.equal(nom);
+    expect(userData.prenom).to.equal(prenom);
+    expect(userData.dateNaissance).to.equal(dateNaissance);
+    expect(userData.email).to.equal(email);
+    expect(userData.adresse).to.equal(adresse);
+    expect(userData.telephone).to.equal(telephone);
+    expect(userData.autorisationOwner).to.equal(true);
 
-        assert.equal(grantedValue, dataValue, "La valeur accordée devrait être égale à la valeur d'origine.");
-    });
+    // Verify the emitted event
+    const event = (
+      await dataStorage.queryFilter("NouvelUtilisateurEnregistre")
+    )[0];
+    expect(event.args[0]).to.equal(user1.address);
+  });
 
-    it("devrait stocker et récupérer des données personnelles", async () => {
-        const lastname = "John";
-        const firstname = "Doe";
-        const birthday = "15/04/1998";
-        const mail = "John.Doe@gmal.com";
-        const phone = "06 08 06 08 06";
-        const adresse = "1 bis avenue des Doe, 11 111, DoeVille";
-        const accountkey = "1 bis avenue des Doe, 11 111, DoeVille";
-    
-        await dataStorageInstance.storePersonalData(lastname, firstname, birthday, mail, phone, adresse, accountkey, { from: accounts[0] });
-        const { lastname: storedLastname, firstname: storedFirstname, birthday: storedBirthday, mail: storedMail, phone: storedPhone, address: storedAdresse, accountkey: storedAccountkey } = await dataStorageInstance.getPersonalData(accounts[0]);
-    
-        assert.equal(storedLastname, lastname, "Le nom stocké doit être égal au nom d'origine.");
-        assert.equal(storedFirstname, firstname, "Le prénom stocké doit être égal au prénom d'origine.");
-        assert.equal(storedBirthday, birthday, "Le prénom stocké doit être égal au prénom d'origine.");
-        assert.equal(storedMail, mail, "Le prénom stocké doit être égal au prénom d'origine.");
-        assert.equal(storedPhone, phone, "Le prénom stocké doit être égal au prénom d'origine.");
-        assert.equal(storedAdresse, adresse, "Le prénom stocké doit être égal au prénom d'origine.");
-        assert.equal(storedAccountkey, accountkey, "Le prénom stocké doit être égal au prénom d'origine.");
-    });
-    
-    it("devrait accorder l'accès et récupérer des données personnelles accordées", async () => {
-        const lastname = "John";
-        const firstname = "Doe";
-        const birthday = "15/04/1998";
-        const mail = "John.Doe@gmal.com";
-        const phone = "06 08 06 08 06";
-        const adresse = "1 bis avenue des Doe, 11 111, DoeVille";
-        const accountkey = "1 bis avenue des Doe, 11 111, DoeVille";
+  it("Récupère les données en tant que propriétaire", async function () {
+    const ownerData = await dataStorage.recupererOwnerDonneeUtilisateur(
+      user1.address
+    );
+    expect(ownerData[0]).to.equal("User3");
+    expect(ownerData[1]).to.equal("Doe3 ");
+    expect(ownerData[2]).to.equal("01/01/1998");
+    expect(ownerData[3]).to.equal("ali@example.com");
+    expect(ownerData[4]).to.equal("654 Main St");
+    expect(ownerData[5]).to.equal("1234567897");
+  });
 
-        const thirdParty = accounts[1];
-    
-        await dataStorageInstance.storePersonalData(lastname, firstname, birthday, mail, phone, adresse, accountkey, { from: accounts[0] });
-        await dataStorageInstance.grantAccessPersonalData(accounts[0], thirdParty, { from: accounts[0] });
-    
-        const { lastname: grantedLastname, firstname: grantedFirstname, birthday : grantedBirthday, mail: grantedMail, phone: grantedPhone, adresse: grantedAdresse, accountkey: grantedAccountkey } = await dataStorageInstance.getPersonalData(thirdParty);
-    
-        assert.equal(grantedLastname, lastname, "Le nom accordé doit être égal au nom d'origine.");
-        assert.equal(grantedFirstname, firstname, "Le prénom accordé doit être égal au prénom d'origine.");
-        assert.equal(grantedBirthday, birthday, "Le prénom accordé doit être égal au prénom d'origine.");
-        assert.equal(grantedMail, mail, "Le prénom accordé doit être égal au prénom d'origine.");
-        assert.equal(grantedPhone, phone, "Le prénom accordé doit être égal au prénom d'origine.");
-        assert.equal(grantedAdresse, adresse, "Le prénom accordé doit être égal au prénom d'origine.");
-        assert.equal(grantedAccountkey, accountkey, "Le prénom accordé doit être égal au prénom d'origine.");
-    });
-    
+  it("Accorde une autorisation à un utilisateur", async function () {
+    await dataStorage.accorderAutorisation(user1.address, user2.address);
+    const hasAuthorization = await dataStorage.getAccesAuthorisation(
+      user1.address,
+      user2.address
+    );
+    expect(hasAuthorization).to.equal(true);
+
+    const event = (await dataStorage.queryFilter("AutorisationAccordee"))[0];
+    expect(event.args[0]).to.equal(user1.address);
+    expect(event.args[1]).to.equal(user2.address);
+
+    const authorizedAddresses = await dataStorage.getAuthorizations(
+      user1.address
+    );
+    expect(authorizedAddresses).to.deep.include(user2.address);
+  });
+
+  it("Récupère les données autorisées par un utilisateur", async function () {
+    await dataStorage.accorderAutorisation(user1.address, user2.address);
+    const authorizedData = await dataStorage.recupererDonneesAutorisees(
+      user1.address,
+      user2.address
+    );
+
+    // Vérifiez que les données récupérées correspondent aux données de l'utilisateur
+    const userData = await dataStorage.recupererOwnerDonneeUtilisateur(
+      user1.address
+    );
+
+    expect(authorizedData[0]).to.equal(userData.nom);
+    expect(authorizedData[1]).to.equal(userData.prenom);
+    expect(authorizedData[2]).to.equal(userData.dateNaissance);
+    expect(authorizedData[3]).to.equal(userData.email);
+    expect(authorizedData[4]).to.equal(userData.adresse);
+    expect(authorizedData[5]).to.equal(userData.telephone);
+  });
+
+  it("Révoque une autorisation à un utilisateur", async function () {
+    // Accorde d'abord une autorisation
+    await dataStorage.accorderAutorisation(user1.address, user2.address);
+
+    // Révoque l'autorisation
+    await dataStorage.revoquerAutorisation(user1.address, user2.address);
+
+    const hasAuthorization = await dataStorage.getAccesAuthorisation(
+      user1.address,
+      user2.address
+    );
+    expect(hasAuthorization).to.equal(false);
+
+    const event = (await dataStorage.queryFilter("AutorisationRevoquee"))[0];
+    expect(event.args[0]).to.equal(user1.address);
+    expect(event.args[1]).to.equal(user2.address);
+  });
 });
